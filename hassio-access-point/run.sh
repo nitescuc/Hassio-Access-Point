@@ -39,6 +39,7 @@ HOSTAPD_CONFIG_OVERRIDE=$(jq --raw-output '.hostapd_config_override | join(" ")'
 CLIENT_INTERNET_ACCESS=$(jq --raw-output ".client_internet_access" $CONFIG_PATH)
 CLIENT_DNS_OVERRIDE=$(jq --raw-output '.client_dns_override | join(" ")' $CONFIG_PATH)
 DNSMASQ_CONFIG_OVERRIDE=$(jq --raw-output '.dnsmasq_config_override | join(" ")' $CONFIG_PATH)
+MDNS_REPEATER=$(jq --raw-output ".mdns_repeater" $CONFIG_PATH)
 
 # Set interface as wlan0 if not specified in config
 if [ ${#INTERFACE} -eq 0 ]; then
@@ -234,6 +235,11 @@ fi
 if [ $DHCP -eq 1 ]; then
     logger "## Starting dnsmasq daemon" 1
 	killall -q dnsmasq; dnsmasq -C /dnsmasq.conf
+fi
+
+if [ $MDNS_REPEATER -eq 1 ]; then
+    logger "## Starting mdns-repeater" 1
+    killall -q mdns-repeater; mdns-repeater -w $ADDRESS/24 $INTERFACE hassio eth0
 fi
 
 logger "## Starting hostapd daemon" 1
